@@ -104,6 +104,16 @@ describe "Authentication" do
         end
             
       end # as wrong user
+      
+      describe "as admin user" do
+        let(:admin) { FactoryGirl.create(:admin) }
+        before { sign_in admin }
+
+        describe "can not delete himself" do
+          before { delete user_path(admin) }
+          specify { response.should redirect_to(root_path) }        
+        end # can not delete himself
+      end # as admin user
 
       describe "as non-admin user" do
         let(:user) { FactoryGirl.create(:user) }
