@@ -107,4 +107,13 @@ describe User do
       it { should_not be_valid }    
     end
     
+    describe "email should be lowercased" do
+      it "should be saved all lowercase" do
+        @user.email = 'KIM@HOME.COM' 
+        @user.save
+        @user.reload.email.should == 'kim@home.com'
+      end
+    end
+    
+    
 end
