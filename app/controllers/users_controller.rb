@@ -47,7 +47,7 @@ class UsersController < ApplicationController
       flash[:error] = "Can not delete thyself."
       redirect_to root_path
     else
-      userToDelete.destroy
+      user_to_delete.destroy
       flash[:success] = "User destroyed."
       redirect_to users_path
     end
