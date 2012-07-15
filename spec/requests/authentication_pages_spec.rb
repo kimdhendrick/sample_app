@@ -32,6 +32,7 @@ describe "Authentication" do
         before { sign_in user }
 
         it { should have_selector('title', text: user.name) }
+        it { should have_link('Users', href: users_path) }        
         it { should have_link('Profile', href: user_path(user)) }
         it { should have_link('Settings', href: edit_user_path(user)) }        
         it { should have_link('Sign out', href: signout_path) }
@@ -77,8 +78,13 @@ describe "Authentication" do
             before { put user_path(user) }
             specify { response.should redirect_to(signin_path) }
           end # submiting to the update action
+
+          describe "visiting the user index" do
+            before { visit users_path }
+            it { should have_selector('title', text: 'Sign in') }
+          end # visiting the user index         
+          
         end # in the Users controller
-        
         
       end # for non-signed in users
       
@@ -98,7 +104,19 @@ describe "Authentication" do
         end
             
       end # as wrong user
-                
+
+      describe "as non-admin user" do
+        let(:user) { FactoryGirl.create(:user) }
+        let(:non_admin) { FactoryGirl.create(:user) }
+
+        before { sign_in non_admin }
+
+        describe "submitting a DELETE request to the Users#destroy action" do
+          before { delete user_path(user) }
+          specify { response.should redirect_to(root_path) }        
+        end # submitting a DELETE rquest to the Users#destroy action
+      end # as non-admin user
+                          
     end # authorization          
           
 end #   Authentication

@@ -29,14 +29,14 @@ describe "User pages" do
         it "should not create a user" do
           expect { click_button submit }.not_to change(User, :count)
         end
-      end
+      end # with invalid information
       
       describe "after submission" do
           before { click_button submit }
 
           it { should have_selector('title', text: 'Sign up') }
           it { should have_content('error') }
-      end
+      end # after submission
 
       describe "with valid information" do
         before do
@@ -57,11 +57,10 @@ describe "User pages" do
           it { should have_selector('title', text: user.name) }
           it { should have_selector('div.alert.alert-success', text: 'Welcome') }
           it { should have_link('Sign out') }        
-        end
+        end # after saving the user
         
-      end
-                  
-    end
+      end # with valid information                  
+    end # signup
     
     describe "edit" do
         let(:user) { FactoryGirl.create(:user) }
@@ -74,13 +73,13 @@ describe "User pages" do
           it { should have_selector('h1',    text: "Update your profile") }
           it { should have_selector('title', text: "Edit user") }
           it { should have_link('change', href: 'http://gravatar.com/emails') }
-        end
+        end # page
 
         describe "with invalid information" do
           before { click_button "Save changes" }
 
           it { should have_content('error') }
-        end
+        end # with invalid information
         
         describe "with valid information" do
               let(:new_name)  { "New Name" }
@@ -98,9 +97,54 @@ describe "User pages" do
               it { should have_link('Sign out', href: signout_path) }
               specify { user.reload.name.should  == new_name }
               specify { user.reload.email.should == new_email }
-            end
+        end # with valid information
                     
-      end
+      end # edit
 
+      describe "index" do
+        let(:user) { FactoryGirl.create(:user) }
+
+        before(:all) { 30.times { FactoryGirl.create(:user) } }
+        after(:all)  { User.delete_all }
+
+        before(:each) do
+          sign_in user
+          visit users_path
+        end
+
+        it { should have_selector('title', text: 'All users') }
+        it { should have_selector('h1',    text: 'All users') }
+
+        describe "pagination" do
+
+          it { should have_selector('div.pagination') }
+          it "should list each user" do
+            User.paginate(page: 1).each do |user|
+              page.should have_selector('li', text: user.name)
+            end
+          end # should list each user
+      end # pagination      
+      
+      describe "delete links" do
+
+        it { should_not have_link('delete') }
+
+        describe "as an admin user" do
+          let(:admin) { FactoryGirl.create(:admin) }
+          before do
+            sign_in admin
+            visit users_path
+          end
+
+          it { should have_link('delete', href: user_path(User.first)) }
+          it "should be able to delete another user" do
+            expect { click_link('delete') }.to change(User, :count).by(-1)
+          end
+          it { should_not have_link('delete', href: user_path(admin)) }
+          
+        end # as an admin user
+      end # delete links
+
+    end # index
         
-end
+end # User pages
