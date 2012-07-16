@@ -16,7 +16,24 @@ describe "Static pages" do
 
     it_should_behave_like "all static pages"
     it { should_not have_selector 'title', text: '| Home' }
-  end
+    
+    describe "for signed-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+        FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+        sign_in user
+        visit root_path
+      end
+
+      it "should render the user's feed" do
+        user.feed.each do |item|
+          page.should have_selector("li##{item.id}", text: item.content)
+        end
+      end # should render the user's feed
+    end # for signed-in users
+            
+  end # Home page
 
   describe "Help page" do
     before { visit help_path }
@@ -25,7 +42,7 @@ describe "Static pages" do
     let(:page_title) { 'Help' }
 
     it_should_behave_like "all static pages"
-  end
+  end # Help page
 
   describe "About page" do
     before { visit about_path }
@@ -58,5 +75,6 @@ describe "Static pages" do
       page.should have_selector 'title', text: full_title('Sign up')
       click_link "sample app"
       page.should have_selector 'title', text: full_title('')
-    end
-end
+    end # should have the right links on the layout
+    
+end # Static pages

@@ -12,9 +12,9 @@ describe "Authentication" do
   end # signin page
 
   describe "signin" do
-      before { visit signin_path }
+    before { visit signin_path }
 
-      describe "with invalid information" do
+    describe "with invalid information" do
         before { click_button "Sign in" }
 
         it { should have_selector('title', text: 'Sign in') }
@@ -25,7 +25,7 @@ describe "Authentication" do
           it { should_not have_selector('div.alert.alert-error') }
         end
         
-      end
+      end # with invalid information
 
     describe "with valid information" do
         let(:user) { FactoryGirl.create(:user) }
@@ -47,7 +47,7 @@ describe "Authentication" do
           
     describe "authorization" do
 
-      describe "for non-signed-in users" do
+    describe "for non-signed-in users" do
         let(:user) { FactoryGirl.create(:user) }
         
         describe "when attempting to visit a protected page" do
@@ -85,10 +85,22 @@ describe "Authentication" do
           end # visiting the user index         
           
         end # in the Users controller
-        
+
+        describe "in the Microposts controller" do
+          describe "submitting to the create action" do
+            before { post microposts_path }
+          specify { response.should redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { response.should redirect_to(signin_path) }
+          end
+        end # in the Microposts controller
+                      
       end # for non-signed in users
       
-      describe "as wrong user" do
+    describe "as wrong user" do
         let(:user) { FactoryGirl.create(:user) }
         let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@example.com") }
         before { sign_in user }
@@ -105,7 +117,7 @@ describe "Authentication" do
             
       end # as wrong user
       
-      describe "as admin user" do
+    describe "as admin user" do
         let(:admin) { FactoryGirl.create(:admin) }
         before { sign_in admin }
 
@@ -115,7 +127,7 @@ describe "Authentication" do
         end # can not delete himself
       end # as admin user
 
-      describe "as non-admin user" do
+    describe "as non-admin user" do
         let(:user) { FactoryGirl.create(:user) }
         let(:non_admin) { FactoryGirl.create(:user) }
 
